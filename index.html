@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTM 생성기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #FAF8F3;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: #FAF8F3;
+        }
+
+        .logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .container {
+            background: #FFFEFB;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #2E3D1F;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #5A6B49;
+            margin-bottom: 40px;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 32px;
+        }
+        
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+
+        .optional {
+            color: #95a5a6;
+            font-weight: normal;
+            font-size: 12px;
+            margin-left: 4px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: border-color 0.3s;
+            background-color: #fff;
+        }
+        
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 48px;
+            background-image: linear-gradient(45deg, transparent 50%, #8B9A6B 50%),
+                              linear-gradient(135deg, #8B9A6B 50%, transparent 50%),
+                              linear-gradient(to right, #e0e0e0, #e0e0e0);
+            background-position: calc(100% - 22px) calc(50% - 5px),
+                               calc(100% - 14px) calc(50% - 5px),
+                               calc(100% - 36px) 50%;
+            background-size: 8px 8px, 8px 8px, 2px 60%;
+            background-repeat: no-repeat;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #8B9A6B;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #8B9A6B;
+            margin-left: 8px;
+            font-weight: normal;
+        }
+
+        .custom-input {
+            display: none;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .result-section {
+            margin-top: 48px;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-section.show {
+            display: block;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .result-url {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 13px;
+            color: #8B9A6B;
+            border: 2px solid #E8E3D8;
+            margin-bottom: 15px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .generate-btn {
+            background: #8B9A6B;
+            color: white;
+            margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 154, 107, 0.4);
+        }
+        
+        .copy-btn {
+            background: #D4A574;
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background: #C4956A;
+        }
+        
+        .clear-btn {
+            background: #F5F5DC;
+            color: #333;
+            border: 2px solid #E8E3D8;
+        }
+
+        .clear-btn:hover {
+            background: #EEECD8;
+        }
+        
+        .success-message {
+            background: #7A9B5C;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <div class="logo-circle">
+                <img src="https://private-user-images.githubusercontent.com/216455622/502650958-74b085b4-7ad9-482b-95d5-5f90b17750e2.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjA3MTc0NzgsIm5iZiI6MTc2MDcxNzE3OCwicGF0aCI6Ii8yMTY0NTU2MjIvNTAyNjUwOTU4LTc0YjA4NWI0LTdhZDktNDgyYi05NWQ1LTVmOTBiMTc3NTBlMi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMDE3JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTAxN1QxNjA2MThaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT05MGQzYmI0YjA4NjMxNmIxYjM2MjlkYzg2Zjk0ZDY4MzU5OTVhNzhiYTAzODBkMmYzMGI0NTAxNDhlYzllMzQwJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.bVilNeh5zum6p6Y51GQTj5Ee2VlHRCH42pUV7d1xwHM" alt="Recipesoup Logo">
+            </div>
+        </div>
+
+        <h1>UTM 파라미터 생성기</h1>
+        <p class="subtitle">마케팅 캠페인 추적을 위한 UTM 링크를 쉽게 만들어보세요</p>
+        
+        <form id="utmForm">
+            <div class="form-group">
+                <label>웹사이트 URL <span class="required">*</span> <span class="hint">추적하려는 페이지의 전체 URL을 입력하세요</span></label>
+                <input type="url" id="url" placeholder="https://example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label>캠페인 소스 (Source) <span class="required">*</span> <span class="hint">트래픽 출처: 어디서 왔는가</span></label>
+                <select id="source" required>
+                    <option value="linkedin">linkedin</option>
+                    <option value="youtube">youtube</option>
+                    <option value="instagram">instagram</option>
+                    <option value="blog">blog</option>
+                    <option value="newsletter">newsletter</option>
+                    <option value="custom">직접 입력</option>
+                </select>
+                <input type="text" id="sourceCustom" class="custom-input" placeholder="직접 입력 시 소스를 입력하세요" aria-label="캠페인 소스 직접 입력">
+            </div>
+            
+            
+            <div class="form-group">
+                <label>캠페인 매체 (Medium) <span class="required">*</span> <span class="hint">마케팅 매체 유형</span></label>
+                <select id="medium" required>
+                    <option value="social">Social (소셜 미디어)</option>
+                    <option value="cpc">CPC (클릭당 과금 광고)</option>
+                    <option value="email">Email</option>
+                    <option value="banner">Banner (배너 광고)</option>
+                    <option value="affiliate">Affiliate (제휴)</option>
+                    <option value="organic">Organic (자연 검색)</option>
+                    <option value="referral">Referral (추천)</option>
+                    <option value="custom">직접 입력</option>
+                </select>
+                <input type="text" id="mediumCustom" class="custom-input" placeholder="직접 입력 시 매체를 입력하세요" aria-label="캠페인 매체 직접 입력">
+            </div>
+            
+            <div class="form-group">
+                <label>캠페인 이름 (Campaign) <span class="required">*</span> <span class="hint">콘텐츠 구분 (A/B 테스트, 같은 캠페인 내 구분(예: spring_sale, product_launch)</span></label>
+                <select id="campaign" required>
+                    <option value="recipesoup_series">recipesoup_series</option>
+                    <option value="custom">직접 입력</option>
+                </select>
+                <input type="text" id="campaignCustom" class="custom-input" placeholder="직접 입력 시 캠페인 이름을 입력하세요" aria-label="캠페인 이름 직접 입력">
+            </div>
+            
+            <div class="form-group">
+                <label>캠페인 콘텐츠 (Content) <span class="optional">선택사항</span> <span class="hint">같은 캠페인의 다른 버전을 구분할 때 사용</span></label>
+                <select id="content">
+                    <option value="" selected>선택하지 않음</option>
+                    <option value="prolog">prolog</option>
+                    <option value="episode1">episode1</option>
+                    <option value="episode2">episode2</option>
+                    <option value="episode3">episode3</option>
+                    <option value="episode5">episode5</option>
+                    <option value="episode6">episode6</option>
+                    <option value="episode7">episode7</option>
+                    <option value="episode8">episode8</option>
+                    <option value="episode9">episode9</option>
+                    <option value="episode10">episode10</option>
+                    <option value="custom">직접 입력</option>
+                </select>
+                <input type="text" id="contentCustom" class="custom-input" placeholder="직접 입력 시 콘텐츠를 입력하세요" aria-label="캠페인 콘텐츠 직접 입력">
+            </div>
+            
+            <div class="form-group">
+                <label>캠페인 키워드 (Term) <span class="optional">선택사항</span> <span class="hint">검색 키워드 (주로 유료 검색 광고용, Google Ads 등)</span></label>
+                <input type="text" id="term" placeholder="ai_recipe_app">
+            </div>
+            
+            <button type="submit" class="generate-btn">UTM 링크 생성하기</button>
+        </form>
+        
+        <div class="result-section" id="resultSection">
+            <div class="result-label">생성된 UTM 링크</div>
+            <div class="result-url" id="resultUrl"></div>
+            <div class="button-group">
+                <button class="clear-btn" onclick="clearForm()">초기화</button>
+                <button class="copy-btn" onclick="copyUrl()">링크 복사</button>
+            </div>
+            <div class="success-message" id="successMessage">✓ 클립보드에 복사되었습니다!</div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 40px; color: #5A6B49; font-size: 12px;">
+        &copy; 2025 Recipesoup
+    </footer>
+    
+    <script>
+        const customInputs = {};
+        const customConfigs = [
+            { selectId: 'source', inputId: 'sourceCustom', required: true },
+            { selectId: 'medium', inputId: 'mediumCustom', required: true },
+            { selectId: 'campaign', inputId: 'campaignCustom', required: true },
+            { selectId: 'content', inputId: 'contentCustom', required: false }
+        ];
+
+        customConfigs.forEach(setupCustomInput);
+
+        function setupCustomInput({ selectId, inputId, required }) {
+            const selectEl = document.getElementById(selectId);
+            const inputEl = document.getElementById(inputId);
+
+            const toggleInput = () => {
+                if (selectEl.value === 'custom') {
+                    inputEl.style.display = 'block';
+                    inputEl.required = required;
+                } else {
+                    inputEl.style.display = 'none';
+                    inputEl.required = false;
+                    inputEl.value = '';
+                }
+            };
+
+            toggleInput();
+            selectEl.addEventListener('change', toggleInput);
+
+            customInputs[selectId] = { selectEl, inputEl, toggleInput };
+        }
+
+        function getCustomValue(selectId) {
+            const { selectEl, inputEl } = customInputs[selectId];
+            const value = selectEl.value;
+            if (value === 'custom') {
+                return inputEl.value.trim();
+            }
+            return value.trim();
+        }
+
+        document.getElementById('utmForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let baseUrl = document.getElementById('url').value.trim();
+            const source = getCustomValue('source');
+            const medium = getCustomValue('medium');
+            const campaign = getCustomValue('campaign');
+            const content = getCustomValue('content');
+            const term = document.getElementById('term').value.trim();
+
+            if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+                baseUrl = 'https://' + baseUrl;
+            }
+
+            const separator = baseUrl.includes('?') ? '&' : '?';
+
+            let utmUrl = baseUrl + separator +
+                         'utm_source=' + encodeURIComponent(source) +
+                         '&utm_medium=' + encodeURIComponent(medium) +
+                         '&utm_campaign=' + encodeURIComponent(campaign);
+
+            if (content) {
+                utmUrl += '&utm_content=' + encodeURIComponent(content);
+            }
+
+            if (term) {
+                utmUrl += '&utm_term=' + encodeURIComponent(term);
+            }
+
+            document.getElementById('resultUrl').textContent = utmUrl;
+            document.getElementById('resultSection').classList.add('show');
+            document.getElementById('successMessage').classList.remove('show');
+
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        function copyUrl() {
+            const urlText = document.getElementById('resultUrl').textContent;
+            navigator.clipboard.writeText(urlText).then(function() {
+                const successMessage = document.getElementById('successMessage');
+                successMessage.classList.add('show');
+                setTimeout(function() {
+                    successMessage.classList.remove('show');
+                }, 3000);
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('utmForm').reset();
+            document.getElementById('resultSection').classList.remove('show');
+            document.getElementById('successMessage').classList.remove('show');
+            document.getElementById('resultUrl').textContent = '';
+
+            Object.values(customInputs).forEach(({ inputEl, toggleInput }) => {
+                inputEl.value = '';
+                toggleInput();
+            });
+        }
+    </script>
+</body>
+</html>
