@@ -244,13 +244,14 @@
         
         <form id="utmForm">
             <div class="form-group">
-                <label>웹사이트 URL <span class="required">*</span> <span class="hint">추적하려는 페이지의 전체 URL을 입력하세요</span></label>
+                <label>웹사이트 URL <span class="required">*</span> <span class="hint">추적하려는 페이지의 전체 URL</span></label>
                 <input type="url" id="url" placeholder="https://example.com" required>
             </div>
             
             <div class="form-group">
-                <label>캠페인 소스 (Source) <span class="required">*</span> <span class="hint">트래픽 출처: 어디서 왔는가</span></label>
+                <label>캠페인 소스 (Source) <span class="required">*</span> <span class="hint">트래픽 출처</span></label>
                 <select id="source" required>
+                    <option value="" selected>선택하지 않음</option>
                     <option value="linkedin">linkedin</option>
                     <option value="youtube">youtube</option>
                     <option value="instagram">instagram</option>
@@ -265,6 +266,7 @@
             <div class="form-group">
                 <label>캠페인 매체 (Medium) <span class="required">*</span> <span class="hint">마케팅 매체 유형</span></label>
                 <select id="medium" required>
+                    <option value="" selected>선택하지 않음</option>
                     <option value="social">Social (소셜 미디어)</option>
                     <option value="cpc">CPC (클릭당 과금 광고)</option>
                     <option value="email">Email</option>
@@ -278,8 +280,9 @@
             </div>
             
             <div class="form-group">
-                <label>캠페인 이름 (Campaign) <span class="required">*</span> <span class="hint">콘텐츠 구분 (A/B 테스트, 같은 캠페인 내 구분(예: spring_sale, product_launch)</span></label>
+                <label>캠페인 이름 (Campaign) <span class="required">*</span> <span class="hint">캠페인 그룹 (A/B 테스트, 시즈널 프로모션, 시리즈 등)</span></label>
                 <select id="campaign" required>
+                    <option value="" selected>선택하지 않음</option>
                     <option value="recipesoup_series">recipesoup_series</option>
                     <option value="custom">직접 입력</option>
                 </select>
@@ -287,7 +290,7 @@
             </div>
             
             <div class="form-group">
-                <label>캠페인 콘텐츠 (Content) <span class="optional">선택사항</span> <span class="hint">같은 캠페인의 다른 버전을 구분할 때 사용</span></label>
+                <label>캠페인 콘텐츠 (Content) <span class="optional">선택사항</span> <span class="hint">같은 캠페인 내 콘텐츠 구분 </span></label>
                 <select id="content">
                     <option value="" selected>선택하지 않음</option>
                     <option value="prolog">prolog</option>
@@ -306,8 +309,8 @@
             </div>
             
             <div class="form-group">
-                <label>캠페인 키워드 (Term) <span class="optional">선택사항</span> <span class="hint">검색 키워드 (주로 유료 검색 광고용, Google Ads 등)</span></label>
-                <input type="text" id="term" placeholder="ai_recipe_app">
+                <label>캠페인 키워드 (Term) <span class="optional">선택사항</span> <span class="hint">검색 키워드 (주로 SA, SS, Google Ads 등 paid 검색 광고)</span></label>
+                <input type="text" id="term" placeholder="예: ai_recipe_app">
             </div>
             
             <button type="submit" class="generate-btn">UTM 링크 생성하기</button>
