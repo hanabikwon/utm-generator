@@ -165,10 +165,28 @@
             border: 2px solid #E8E3D8;
             margin-bottom: 15px;
         }
+
+        .short-url-container {
+            display: none;
+        }
+
+        #copyShortBtn {
+            display: none;
+        }
         
+        .copy-short-btn {
+            background: #b68c5a;
+            color: white;
+        }
+
+        .copy-short-btn:hover {
+            background: #a57f50;
+        }
+
         .button-group {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         button {
@@ -228,6 +246,20 @@
         
         .success-message.show {
             display: block;
+        }
+
+        .save-status {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #5A6B49;
+        }
+
+        .save-status.success {
+            color: #2E3D1F;
+        }
+
+        .save-status.error {
+            color: #c0392b;
         }
     </style>
 </head>
@@ -320,10 +352,19 @@
         <div class="result-section" id="resultSection">
             <div class="result-label">생성된 UTM 링크</div>
             <div class="result-url" id="resultUrl"></div>
-            <div class="button-group">
-                <button class="clear-btn" onclick="clearForm()">초기화</button>
-                <button class="copy-btn" onclick="copyUrl()">링크 복사</button>
+
+            <div class="short-url-container" id="shortUrlContainer">
+                <div class="result-label">단축 링크</div>
+                <div class="result-url" id="resultShortUrl"></div>
             </div>
+
+            <div class="button-group">
+                <button class="clear-btn" type="button" onclick="clearForm()">초기화</button>
+                <button class="copy-btn" type="button" onclick="copyUrl()">링크 복사</button>
+                <button class="copy-btn copy-short-btn" id="copyShortBtn" type="button" onclick="copyShortUrl()">단축 링크 복사</button>
+            </div>
+
+            <div class="save-status" id="saveStatus"></div>
             <div class="success-message" id="successMessage">✓ 클립보드에 복사되었습니다!</div>
         </div>
     </div>
@@ -333,6 +374,8 @@
     </footer>
     
     <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzPN8ktORE-kSb_155PTlnTS5E-O-RAeu3tWD74KE6B6Rwxgp_TEcG-Cq_Zi5S-C2jp/exec';
+
         const customInputs = {};
         const customConfigs = [
             { selectId: 'source', inputId: 'sourceCustom', required: true },
@@ -340,6 +383,15 @@
             { selectId: 'campaign', inputId: 'campaignCustom', required: true },
             { selectId: 'content', inputId: 'contentCustom', required: false }
         ];
+
+        const resultSection = document.getElementById('resultSection');
+        const resultUrlEl = document.getElementById('resultUrl');
+        const shortUrlContainer = document.getElementById('shortUrlContainer');
+        const shortUrlEl = document.getElementById('resultShortUrl');
+        const copyShortBtn = document.getElementById('copyShortBtn');
+        const saveStatusEl = document.getElementById('saveStatus');
+        const successMessageEl = document.getElementById('successMessage');
+        const successMessageDefault = successMessageEl.textContent;
 
         customConfigs.forEach(setupCustomInput);
 
@@ -373,7 +425,7 @@
             return value.trim();
         }
 
-        document.getElementById('utmForm').addEventListener('submit', function(e) {
+        document.getElementById('utmForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             let baseUrl = document.getElementById('url').value.trim();
@@ -402,34 +454,121 @@
                 utmUrl += '&utm_term=' + encodeURIComponent(term);
             }
 
-            document.getElementById('resultUrl').textContent = utmUrl;
-            document.getElementById('resultSection').classList.add('show');
-            document.getElementById('successMessage').classList.remove('show');
+            resultUrlEl.textContent = utmUrl;
+            resultSection.classList.add('show');
+            successMessageEl.classList.remove('show');
+            successMessageEl.textContent = successMessageDefault;
 
-            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+            shortUrlContainer.style.display = 'none';
+            copyShortBtn.style.display = 'none';
+            shortUrlEl.textContent = '';
+            saveStatusEl.textContent = '';
+            saveStatusEl.classList.remove('success', 'error');
+
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+
+            await saveLinkToSheet({
+                originalUrl: baseUrl,
+                utmSource: source,
+                utmMedium: medium,
+                utmCampaign: campaign,
+                utmContent: content,
+                utmTerm: term,
+                memo: '',
+                utmUrl
+            });
         });
 
         function copyUrl() {
-            const urlText = document.getElementById('resultUrl').textContent;
+            const urlText = resultUrlEl.textContent;
+            if (!urlText) {
+                return;
+            }
             navigator.clipboard.writeText(urlText).then(function() {
-                const successMessage = document.getElementById('successMessage');
-                successMessage.classList.add('show');
-                setTimeout(function() {
-                    successMessage.classList.remove('show');
-                }, 3000);
+                showCopyMessage('✓ UTM 링크가 복사되었습니다!');
             });
         }
 
         function clearForm() {
             document.getElementById('utmForm').reset();
-            document.getElementById('resultSection').classList.remove('show');
-            document.getElementById('successMessage').classList.remove('show');
-            document.getElementById('resultUrl').textContent = '';
+            resultSection.classList.remove('show');
+            successMessageEl.classList.remove('show');
+            successMessageEl.textContent = successMessageDefault;
+            resultUrlEl.textContent = '';
+            shortUrlEl.textContent = '';
+            shortUrlContainer.style.display = 'none';
+            copyShortBtn.style.display = 'none';
+            saveStatusEl.textContent = '';
+            saveStatusEl.classList.remove('success', 'error');
 
             Object.values(customInputs).forEach(({ inputEl, toggleInput }) => {
                 inputEl.value = '';
                 toggleInput();
             });
+        }
+
+        function copyShortUrl() {
+            const urlText = shortUrlEl.textContent;
+            if (!urlText) {
+                return;
+            }
+            navigator.clipboard.writeText(urlText).then(function() {
+                showCopyMessage('✓ 단축 링크가 복사되었습니다!');
+            });
+        }
+
+        function showCopyMessage(message) {
+            successMessageEl.textContent = message;
+            successMessageEl.classList.add('show');
+            setTimeout(function() {
+                successMessageEl.classList.remove('show');
+                successMessageEl.textContent = successMessageDefault;
+            }, 3000);
+        }
+
+        async function saveLinkToSheet(payload) {
+            if (!WEB_APP_URL || WEB_APP_URL.includes('YOUR_WEB_APP_ID')) {
+                saveStatusEl.textContent = 'Apps Script 웹앱 URL을 설정한 뒤 다시 시도하세요.';
+                saveStatusEl.classList.add('error');
+                return;
+            }
+
+            try {
+                saveStatusEl.textContent = 'Google Sheets에 저장 중입니다...';
+                saveStatusEl.classList.remove('error', 'success');
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed with status ' + response.status);
+                }
+
+                const data = await response.json();
+
+                if (data && data.shortUrl) {
+                    shortUrlEl.textContent = data.shortUrl;
+                    shortUrlContainer.style.display = 'block';
+                    copyShortBtn.style.display = 'block';
+                } else {
+                    shortUrlEl.textContent = '단축 URL 응답을 받지 못했습니다.';
+                    shortUrlContainer.style.display = 'block';
+                    copyShortBtn.style.display = 'none';
+                }
+
+                saveStatusEl.textContent = '시트에 저장되었습니다.';
+                saveStatusEl.classList.add('success');
+            } catch (error) {
+                console.error('Failed to save link to sheet', error);
+                saveStatusEl.textContent = '시트 저장에 실패했습니다. 잠시 후 다시 시도하세요.';
+                saveStatusEl.classList.remove('success');
+                saveStatusEl.classList.add('error');
+                shortUrlContainer.style.display = 'none';
+                copyShortBtn.style.display = 'none';
+                shortUrlEl.textContent = '';
+            }
         }
     </script>
 </body>
